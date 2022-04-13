@@ -49,7 +49,26 @@ const account2 = {
   locale: 'en-US',
 };
 
-const accounts = [account1, account2];
+const account3 = {
+  owner: 'Steven Thomas',
+  movements: [200, -200, 340, -300, -2, 400, -460],
+  interestRate: 0.7,
+  pin: 3333,
+
+  movementsDates: [
+    '2019-05-01T13:15:33.035Z',
+    '2019-11-30T09:48:16.867Z',
+    '2020-12-25T06:04:23.907Z',
+    '2021-01-25T14:18:46.235Z',
+    '2021-02-05T16:33:06.386Z',
+    '2021-04-10T14:43:26.374Z',
+    '2021-09-25T18:49:59.371Z',
+  ],
+  currency: 'USD',
+  locale: 'en-US',
+};
+
+const accounts = [account1, account2, account3];
 
 /////////////////////////////////////////////////
 // Elements
@@ -90,12 +109,6 @@ const formatMovementDate = function (date, local) {
   if (dayPassed === 0) return 'Today';
   if (dayPassed === 1) return 'Yesterday';
   if (dayPassed <= 7) return `${dayPassed} days ago`;
-
-  // const day = `${date.getDate()}`.padStart(2, 0);
-  // // month is zero based so we add 1 to it
-  // const month = `${date.getMonth() + 1}`.padStart(2, 0);
-  // const year = date.getFullYear();
-  // return `${day}/${month}/${year}`;
 
   //this gives same output of the 5 lines above
   return new Intl.DateTimeFormat(local).format(date);
@@ -211,7 +224,7 @@ const startLogOutTimer = function () {
   };
 
   // Set time to 5 minutes
-  let time = 5*60;
+  let time = 5 * 60;
 
   // Call the timer every second
   tick();
@@ -231,25 +244,16 @@ let currentAccount, timer;
 // updateUi(currentAccount);
 // containerApp.style.opacity = 1;
 
-// const now = new Date();
-// const day = `${now.getDate()}`.padStart(2, 0);
-// // month is zero based so we add 1 to it
-// const month = `${now.getMonth() + 1}`.padStart(2, 0);
-// const year = now.getFullYear();
-// const hour = `${now.getHours()}`.padStart(2, 0);
-// const minute = `${now.getMinutes()}`.padStart(2, 0);
-
-// // display current date
-// labelDate.textContent = `${day}/${month}/${year}, ${hour}:${minute}`;
-
 // Event handler login
 btnLogin.addEventListener('click', function (e) {
+  // Prevent form from submitting
   e.preventDefault();
   currentAccount = accounts.find(
     acc => acc.username === inputLoginUsername.value
   );
 
   if (currentAccount?.pin === Number(inputLoginPin.value)) {
+    // Display UI and message
     labelWelcome.textContent = `welcome back ${
       currentAccount.owner.split(' ')[0]
     }`;
@@ -277,7 +281,7 @@ btnLogin.addEventListener('click', function (e) {
     ).format(now);
 
     // timer
-    // first reset timer for different userts and logins
+    // first reset timer for different users and logins
     if (timer) clearInterval(timer);
     timer = startLogOutTimer();
 
@@ -353,7 +357,7 @@ btnClose.addEventListener('click', function (e) {
     // delete account
     accounts.splice(index, 1);
 
-    //hide ui
+    //hide ui + Change message
     containerApp.style.opacity = 0;
     labelWelcome.textContent = 'Log in to get started';
     // clear input text
