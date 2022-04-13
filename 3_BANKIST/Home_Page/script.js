@@ -68,6 +68,8 @@ btnScrollTo.addEventListener('click', function (e) {
 // });
 
 // Second Method (Event Delegation)
+// 1. Add event listener to common parent element
+// 2. Determine what element originated the event
 document.querySelector('.nav__links').addEventListener('click', e => {
   e.preventDefault();
   if (e.target.classList.contains('nav__link')) {
@@ -85,16 +87,17 @@ const tabsContent = document.querySelectorAll('.operations__content');
 tabsContainer.addEventListener('click', function (e) {
   const clicked = e.target.closest('.operations__tab');
 
-  // (Gaurd clause) to prevent error from returning null
+  // (Gaurd clause) to prevent error from returning null (as if you clicked on other than '.operations__tab' element )
   if (!clicked) return;
 
-  // Active tab
-  tabs.forEach(tab => tab.classList.remove('operations__tab--active'));
+  // Remove active classes
+  tabs.forEach(t => t.classList.remove('operations__tab--active'));
+  tabsContent.forEach(c => c.classList.remove('operations__content--active'));
+
+  // Activate tab
   clicked.classList.add('operations__tab--active');
 
   // Activate content area
-  tabsContent.forEach(t => t.classList.remove('operations__content--active'));
-
   document
     .querySelector(`.operations__content--${clicked.dataset.tab}`)
     .classList.add('operations__content--active');
@@ -118,33 +121,25 @@ nav.addEventListener('mouseover', handleHover.bind(0.5));
 nav.addEventListener('mouseout', handleHover.bind(1));
 
 ///////////////////////////////////////////////////////////////
-// Sticky Navigation
-// get the position of section 1
-const initialCorods = section1.getBoundingClientRect();
-console.log(initialCorods.top);
+// Sticky navigation: Intersection Observer API
 
-// method 1 make nav sticky if section 1 is reached (scroll event is bad for performance as it calculate alot)
-// window.addEventListener('scroll', function (e) {
-//   console.log(window.scrollY);
-//   if (window.scrollY > initialCorods.top) nav.classList.add('sticky');
-//   else nav.classList.remove('sticky');
-// });
-
-// method 2 sticky navigation : Intersection Observer API
 const header = document.querySelector('.header');
-const navHight = nav.getBoundingClientRect().height;
+const navHeight = nav.getBoundingClientRect().height; // to get the exact height without hard-coding it (instead of writing "-90px")
 
 const stickyNav = function (entries) {
-  const [entry] = entries;
-  console.log(entry);
+  const [entry] = entries; // destructuring : same as entry = entries[0]
+  // console.log(entry);
+
   if (!entry.isIntersecting) nav.classList.add('sticky');
   else nav.classList.remove('sticky');
 };
+
 const headerObserver = new IntersectionObserver(stickyNav, {
-  root: null,
-  threshold: 0,
-  rootMargin: `-${navHight}px`, // to make it appear 90px before the line of section 1 (before threshold )
+  root: null, // as we are observing the viewport
+  threshold: 0, // from intersection ratio
+  rootMargin: `-${navHeight}px`, //(instead of writing "-90px")
 });
+
 headerObserver.observe(header);
 
 //////////////////////////////////////////////////////////
@@ -153,10 +148,11 @@ const allSections = document.querySelectorAll('.section');
 const revealSection = function (entries, observer) {
   const [entry] = entries;
 
-  if (!entry.isIntersecting) return;
+  if (!entry.isIntersecting) return; // Guard clause
+  // entry.target => to select the intersecting target (section)
 
   entry.target.classList.remove('section--hidden');
-  observer.unobserve(entry.target);
+  observer.unobserve(entry.target); // for performance
 };
 
 const sectionObserver = new IntersectionObserver(revealSection, {
@@ -170,7 +166,7 @@ allSections.forEach(function (section) {
 });
 
 /////////////////////////////////////////////////////////
-// Lazy Image
+// Lazy loading Image
 const imgTargets = document.querySelectorAll('img[data-src]');
 const loadImg = function (entries, observer) {
   const [entry] = entries;
@@ -180,6 +176,7 @@ const loadImg = function (entries, observer) {
   // replace src with data-src
   entry.target.src = entry.target.dataset.src;
 
+  // show the high quality img without filter class (ONLY) when it loads
   entry.target.addEventListener('load', function () {
     entry.target.classList.remove('lazy-img');
   });
@@ -189,7 +186,7 @@ const loadImg = function (entries, observer) {
 const imgObserver = new IntersectionObserver(loadImg, {
   root: null,
   threshold: 0,
-  rootMargin: '200px',
+  rootMargin: '200px', // so that it happens before the user reach the img by 200px so that he doesn't notice it
 });
 imgTargets.forEach(img => imgObserver.observe(img));
 
@@ -206,6 +203,7 @@ const slider = function () {
 
   // Functions
   const createDots = function () {
+    // adding dots here instead of in html
     slides.forEach(function (_, i) {
       dotContainer.insertAdjacentHTML(
         'beforeend',
@@ -215,10 +213,12 @@ const slider = function () {
   };
 
   const activateDot = function (slide) {
+    // first remove all selections from all dots
     document
       .querySelectorAll('.dots__dot')
       .forEach(dot => dot.classList.remove('dots__dot--active'));
 
+    // then add active-class to the target-dot (select it from the Attribute)
     document
       .querySelector(`.dots__dot[data-slide="${slide}"]`)
       .classList.add('dots__dot--active');
